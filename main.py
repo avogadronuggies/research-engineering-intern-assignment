@@ -37,6 +37,18 @@ def preprocess_text(text):
     filtered_words = [word for word in words if word not in stop_words and len(word) > 2]  # Exclude short words
     return filtered_words
 
+def detect_fake_news(df):
+    """Detect fake news based on keywords."""
+    # List of suspicious keywords (can be expanded)
+    suspicious_keywords = [
+        'fake', 'hoax', 'conspiracy', 'misinformation', 'disinformation',
+        'propaganda', 'rumor', 'unverified', 'false', 'debunked'
+    ]
+    
+    # Check if title contains any suspicious keywords
+    df['fake_news'] = df['title'].apply(lambda x: any(word in x.lower() for word in suspicious_keywords))
+    return df
+
 def generate_wordcloud(df):
     """Generate a word cloud from post titles."""
     all_titles = ' '.join(df['title'])
@@ -80,7 +92,11 @@ def generate_plots(df):
                                  x='created_date', y='sentiment', title='Average Sentiment Over Time',
                                  labels={'created_date': 'Date', 'sentiment': 'Average Sentiment Score'})
     
-    return fig1, fig2, fig3, fig4, sentiment_distribution, sentiment_over_time
+    # Fake news analysis
+    fake_news_distribution = px.pie(df, names='fake_news', title='Fake News Distribution',
+                                    labels={'fake_news': 'Fake News'})
+    
+    return fig1, fig2, fig3, fig4, sentiment_distribution, sentiment_over_time, fake_news_distribution
 
 @app.route('/')
 def dashboard():
@@ -90,9 +106,12 @@ def dashboard():
     # Perform sentiment analysis
     df = analyze_sentiment(df)
     
+    # Detect fake news
+    df = detect_fake_news(df)
+    
     # Generate visualizations
     wordcloud_img = generate_wordcloud(df)
-    fig1, fig2, fig3, fig4, sentiment_distribution, sentiment_over_time = generate_plots(df)
+    fig1, fig2, fig3, fig4, sentiment_distribution, sentiment_over_time, fake_news_distribution = generate_plots(df)
     
     # Convert Plotly figures to HTML
     plot1 = fig1.to_html(full_html=False)
@@ -101,6 +120,7 @@ def dashboard():
     plot4 = fig4.to_html(full_html=False)
     sentiment_plot1 = sentiment_distribution.to_html(full_html=False)
     sentiment_plot2 = sentiment_over_time.to_html(full_html=False)
+    fake_news_plot = fake_news_distribution.to_html(full_html=False)
     
     # Render the dashboard template
     return render_template(
@@ -111,7 +131,8 @@ def dashboard():
         plot3=plot3,
         plot4=plot4,
         sentiment_plot1=sentiment_plot1,
-        sentiment_plot2=sentiment_plot2
+        sentiment_plot2=sentiment_plot2,
+        fake_news_plot=fake_news_plot
     )
 
 @app.route('/top_words')
