@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reddit Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+      /* Flexbox layout for word cloud and pie chart */
+      .visualization-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 40px;
+      }
+      .visualization-container img,
+      .visualization-container div {
+        flex: 1;
+      }
+      #pie-chart {
+        width: 100%;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Reddit Data Analysis Dashboard</h1>
+
+    <!-- Word Cloud and Pie Chart -->
+    <div class="visualization-container">
+      <!-- Word Cloud -->
+      <div>
+        <h2>Word Cloud of Post Titles</h2>
+        <img
+          id="wordcloud"
+          src="data:image/png;base64,{{ wordcloud_img }}"
+          alt="Word Cloud"
+        />
+      </div>
+
+      <!-- Pie Chart -->
+      <div>
+        <h2>Top 10 Most Frequent Words</h2>
+        <div id="pie-chart"></div>
+      </div>
+    </div>
+
+    <!-- Other Visualizations -->
+    <h2>Distribution of Upvotes</h2>
+    <div>{{ plot1 | safe }}</div>
+
+    <h2>Upvotes vs. Number of Comments</h2>
+    <div>{{ plot2 | safe }}</div>
+
+    <h2>Top 10 Most Upvoted Posts</h2>
+    <div>{{ plot3 | safe }}</div>
+
+    <h2>Number of Posts Over Time</h2>
+    <div>{{ plot4 | safe }}</div>
+
+    <h2>Sentiment Analysis</h2>
+    <h3>Sentiment Distribution of Post Titles</h3>
+    <div>{{ sentiment_plot1 | safe }}</div>
+    <h3>Average Sentiment Over Time</h3>
+    <div>{{ sentiment_plot2 | safe }}</div>
+
+    <script>
+      // Function to update the pie chart
+      function updatePieChart(labels, values) {
+        Plotly.newPlot(
+          "pie-chart",
+          [
+            {
+              values: values,
+              labels: labels,
+              type: "pie",
+            },
+          ],
+          {
+            title: "Top 10 Most Frequent Words",
+          }
+        );
+      }
+
+      // Fetch the top 10 words and their frequencies when the page loads
+      fetch("/top_words")
+        .then((response) => response.json())
+        .then((data) => {
+          // Initialize the pie chart with the top 10 words
+          updatePieChart(data.labels, data.values);
+        });
+
+      // Add click event listener to the word cloud
+      document
+        .getElementById("wordcloud")
+        .addEventListener("click", function (event) {
+          // Fetch the top 10 words and their frequencies
+          fetch("/top_words")
+            .then((response) => response.json())
+            .then((data) => {
+              // Update the pie chart
+              updatePieChart(data.labels, data.values);
+            });
+        });
+    </script>
+  </body>
+</html>
