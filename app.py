@@ -162,6 +162,35 @@ def plot_network_graph(df, keyword):
     net.show("network.html")
     st.components.v1.html(open("network.html", "r").read(), height=500)
 
+# Scatterplot to show upvotes vs another variable
+def plot_upvotes_scatter(df, y_axis):
+    """Plot a scatterplot of upvotes vs another variable."""
+    fig = px.scatter(df, x='ups', y=y_axis, title=f"Upvotes vs {y_axis.capitalize()}",
+                     labels={'ups': 'Upvotes', y_axis: y_axis.capitalize()})
+    st.plotly_chart(fig)
+
+# Generate custom insights for Reddit data
+def generate_custom_insights(df):
+    """Generate custom insights based on the dataset."""
+    # Analyze sentiment distribution
+    sentiment_distribution = df['sentiment'].value_counts(normalize=True) * 100
+    sentiment_insight = f"Sentiment Analysis:\n- Positive: {sentiment_distribution.get('positive', 0):.2f}%\n- Neutral: {sentiment_distribution.get('neutral', 0):.2f}%\n- Negative: {sentiment_distribution.get('negative', 0):.2f}%"
+    
+    # Analyze top communities
+    top_communities = df['subreddit'].value_counts().head(3).index.tolist()
+    communities_insight = f"Top Communities:\n- {', '.join(top_communities)}"
+    
+    # Analyze word cloud
+    all_titles = ' '.join(df['title'])
+    filtered_words = preprocess_text(all_titles)
+    word_counts = Counter(filtered_words)
+    top_words = word_counts.most_common(5)
+    wordcloud_insight = f"Top Words in Titles:\n- {', '.join([word for word, _ in top_words])}"
+    
+    # Combine insights
+    insights = f"{sentiment_insight}\n\n{communities_insight}\n\n{wordcloud_insight}"
+    return insights
+
 # Main function
 def main():
     st.title("Reddit Data Analysis Dashboard")
@@ -211,6 +240,14 @@ def main():
             st.subheader("Top Communities/Accounts")
             plot_community_pie_chart(df)
             
+            # Scatterplot: Upvotes vs Number of Comments
+            st.subheader("Upvotes vs Number of Comments")
+            plot_upvotes_scatter(df, y_axis='num_comments')
+            
+            # Scatterplot: Upvotes vs Sentiment Score
+            st.subheader("Upvotes vs Sentiment Score")
+            plot_upvotes_scatter(df, y_axis='sentiment_score')
+            
             # Network visualization
             st.subheader("Network Visualization")
             keyword = st.text_input("Enter a keyword, hashtag, or URL for network visualization")
@@ -244,6 +281,11 @@ def main():
                               title=f'Time Series of Posts Containing "{query}"',
                               labels={'created_date': 'Date', 'count': 'Number of Posts'})
                 st.plotly_chart(fig)
+            
+            # Generate custom insights
+            st.subheader("Custom Insights")
+            insights = generate_custom_insights(df)
+            st.write(insights)
     else:
         st.info("Please upload a dataset to get started.")
 
