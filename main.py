@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import json
 import plotly.express as px
+import plotly.graph_objects as go
 from wordcloud import WordCloud, STOPWORDS
 from collections import Counter
 import re
@@ -11,6 +12,9 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import networkx as nx
+import matplotlib.pyplot as plt
+from pyvis.network import Network
 
 # Download the VADER lexicon and stopwords
 nltk.download('vader_lexicon')
@@ -98,6 +102,31 @@ def perform_topic_modeling(df, num_topics=5):
     
     return topics, df
 
+# Pie chart of communities/accounts
+def plot_community_pie_chart(df):
+    """Plot a pie chart of top communities/accounts."""
+    top_communities = df['subreddit'].value_counts().head(10)
+    fig = px.pie(names=top_communities.index, values=top_communities.values, title="Top Communities/Accounts")
+    st.plotly_chart(fig)
+
+# Network visualization
+def plot_network_graph(df, keyword):
+    """Plot a network graph of accounts sharing a specific keyword."""
+    # Filter posts containing the keyword
+    df_filtered = df[df['title'].str.contains(keyword, case=False, na=False)]
+    
+    # Create a network graph
+    G = nx.Graph()
+    for _, row in df_filtered.iterrows():
+        G.add_node(row['author'], label=row['author'])
+        G.add_edge(row['author'], row['subreddit'])
+    
+    # Visualize the graph using PyVis
+    net = Network(notebook=True, height="500px", width="100%")
+    net.from_nx(G)
+    net.show("network.html")
+    st.components.v1.html(open("network.html", "r").read(), height=500)
+
 # Main function
 def main():
     st.title("Reddit Data Analysis Dashboard")
@@ -123,7 +152,7 @@ def main():
     # Generate word cloud
     st.subheader("Word Cloud of Post Titles")
     wordcloud_img = generate_wordcloud(df)
-    st.image(wordcloud_img, use_container_width=True)  # Updated parameter
+    st.image(wordcloud_img, use_container_width=True)
     
     # Display top 10 most frequent words as a pie chart
     st.subheader("Top 10 Most Frequent Words")
@@ -136,6 +165,16 @@ def main():
     words, counts = zip(*top_words)
     fig = px.pie(names=words, values=counts, title="Top 10 Most Frequent Words")
     st.plotly_chart(fig)
+    
+    # Pie chart of communities/accounts
+    st.subheader("Top Communities/Accounts")
+    plot_community_pie_chart(df)
+    
+    # Network visualization
+    st.subheader("Network Visualization")
+    keyword = st.text_input("Enter a keyword, hashtag, or URL for network visualization")
+    if keyword:
+        plot_network_graph(df, keyword)
     
     # Perform topic modeling
     topics, df = perform_topic_modeling(df)
