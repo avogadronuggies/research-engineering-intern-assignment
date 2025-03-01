@@ -1,26 +1,22 @@
-from flask import Flask, render_template, jsonify, request
+import streamlit as st
 import pandas as pd
 import json
 import plotly.express as px
-import plotly.graph_objects as go
 from wordcloud import WordCloud, STOPWORDS
 from collections import Counter
 import re
 import io
-import base64
 import nltk
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
-import numpy as np
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # Download the VADER lexicon and stopwords
 nltk.download('vader_lexicon')
 nltk.download('stopwords')
 
-app = Flask(__name__)
-
+# Load the dataset
 def load_dataset(file_path):
     """Load the JSON dataset and convert it into a Pandas DataFrame."""
     with open(file_path, 'r') as f:
@@ -28,6 +24,7 @@ def load_dataset(file_path):
     df = pd.DataFrame([post['data'] for post in data])
     return df
 
+# Preprocess text
 def preprocess_text(text):
     """Preprocess text by removing stopwords and non-alphabetic characters."""
     # Load stopwords
@@ -40,18 +37,28 @@ def preprocess_text(text):
     filtered_words = [word for word in words if word not in stop_words and len(word) > 2]  # Exclude short words
     return filtered_words
 
-def detect_fake_news(df):
-    """Detect fake news based on keywords."""
-    # List of suspicious keywords (can be expanded)
-    suspicious_keywords = [
-        'fake', 'hoax', 'conspiracy', 'misinformation', 'disinformation',
-        'propaganda', 'rumor', 'unverified', 'false', 'debunked'
-    ]
+# Perform sentiment analysis
+def analyze_sentiment(df):
+    """Perform sentiment analysis on post titles using VADER."""
+    analyzer = SentimentIntensityAnalyzer()
     
-    # Check if title contains any suspicious keywords
-    df['fake_news'] = df['title'].apply(lambda x: any(word in x.lower() for word in suspicious_keywords))
+    def get_sentiment(text):
+        if not isinstance(text, str) or text.strip() == "":
+            return 0  # Neutral if no text
+        return analyzer.polarity_scores(text)['compound']
+    
+    # Combine title and selftext, handling missing values
+    df['text'] = df[['title', 'selftext']].fillna('').agg(' '.join, axis=1)
+    df['sentiment_score'] = df['text'].apply(get_sentiment)
+    
+    # Categorize sentiment
+    df['sentiment'] = df['sentiment_score'].apply(
+        lambda x: "positive" if x > 0.05 else ("negative" if x < -0.05 else "neutral")
+    )
+    
     return df
 
+# Generate word cloud
 def generate_wordcloud(df):
     """Generate a word cloud from post titles."""
     all_titles = ' '.join(df['title'])
@@ -63,14 +70,9 @@ def generate_wordcloud(df):
     img = io.BytesIO()
     wordcloud.to_image().save(img, format='PNG')
     img.seek(0)
-    return base64.b64encode(img.getvalue()).decode()
+    return img
 
-def analyze_sentiment(df):
-    """Perform sentiment analysis on post titles using NLTK's VADER."""
-    analyzer = SentimentIntensityAnalyzer()
-    df['sentiment'] = df['title'].apply(lambda x: analyzer.polarity_scores(x)['compound'])
-    return df
-
+# Perform topic modeling
 def perform_topic_modeling(df, num_topics=5):
     """Perform topic modeling using NMF."""
     # Preprocess titles
@@ -96,132 +98,73 @@ def perform_topic_modeling(df, num_topics=5):
     
     return topics, df
 
-def generate_plots(df):
-    """Generate Plotly visualizations."""
-    # Distribution of upvotes
-    fig1 = px.histogram(df, x='ups', nbins=30, title='Distribution of Upvotes',
-                        labels={'ups': 'Upvotes', 'count': 'Frequency'},
-                        color_discrete_sequence=['#1f77b4'])
-    
-    # Upvotes vs. Comments
-    fig2 = px.scatter(df, x='ups', y='num_comments', title='Upvotes vs. Number of Comments',
-                      labels={'ups': 'Upvotes', 'num_comments': 'Number of Comments'},
-                      color_discrete_sequence=['#ff7f0e'])
-    
-    # Top 10 most upvoted posts
-    top_10_upvoted = df.sort_values('ups', ascending=False).head(10)
-    fig3 = px.bar(top_10_upvoted, x='ups', y='title', title='Top 10 Most Upvoted Posts',
-                  labels={'ups': 'Upvotes', 'title': 'Post Title'},
-                  color_discrete_sequence=['#2ca02c'])
-    
-    # Number of posts over time
-    df['created_date'] = pd.to_datetime(df['created'], unit='s')
-    posts_over_time = df.groupby(pd.Grouper(key='created_date', freq='ME')).size().reset_index(name='count')
-    fig4 = px.line(posts_over_time, x='created_date', y='count', title='Number of Posts Over Time',
-                   labels={'created_date': 'Date', 'count': 'Number of Posts'},
-                   color_discrete_sequence=['#d62728'])
-    
-    # Sentiment analysis
-    sentiment_distribution = px.histogram(df, x='sentiment', nbins=30, title='Sentiment Distribution of Post Titles',
-                                         labels={'sentiment': 'Sentiment Score', 'count': 'Frequency'},
-                                         color_discrete_sequence=['#9467bd'])
-    sentiment_over_time = px.line(df.groupby(pd.Grouper(key='created_date', freq='ME'))['sentiment'].mean().reset_index(),
-                                 x='created_date', y='sentiment', title='Average Sentiment Over Time',
-                                 labels={'created_date': 'Date', 'sentiment': 'Average Sentiment Score'},
-                                 color_discrete_sequence=['#8c564b'])
-    
-    # Fake news analysis
-    fake_news_distribution = px.pie(df, names='fake_news', title='Fake News Distribution',
-                                    labels={'fake_news': 'Fake News'},
-                                    color_discrete_sequence=['#e377c2', '#7f7f7f'])
-    
-    return fig1, fig2, fig3, fig4, sentiment_distribution, sentiment_over_time, fake_news_distribution
+# Main function
+def main():
+    st.title("Reddit Data Analysis Dashboard")
 
-@app.route('/')
-def dashboard():
     # Load the dataset
     df = load_dataset('./data/data.jsonl')
     
     # Perform sentiment analysis
     df = analyze_sentiment(df)
     
-    # Detect fake news
-    df = detect_fake_news(df)
+    # Display sentiment distribution
+    st.subheader("Sentiment Analysis")
+    sentiment_distribution = df['sentiment'].value_counts()
+    st.write(sentiment_distribution)
+    
+    # Display top positive and negative posts
+    st.subheader("Top Positive Posts")
+    st.write(df[df['sentiment'] == 'positive'][['title', 'sentiment_score']].head())
+    
+    st.subheader("Top Negative Posts")
+    st.write(df[df['sentiment'] == 'negative'][['title', 'sentiment_score']].head())
+    
+    # Generate word cloud
+    st.subheader("Word Cloud of Post Titles")
+    wordcloud_img = generate_wordcloud(df)
+    st.image(wordcloud_img, use_container_width=True)  # Updated parameter
+    
+    # Display top 10 most frequent words as a pie chart
+    st.subheader("Top 10 Most Frequent Words")
+    all_titles = ' '.join(df['title'])
+    filtered_words = preprocess_text(all_titles)
+    word_counts = Counter(filtered_words)
+    top_words = word_counts.most_common(10)
+    
+    # Prepare data for the pie chart
+    words, counts = zip(*top_words)
+    fig = px.pie(names=words, values=counts, title="Top 10 Most Frequent Words")
+    st.plotly_chart(fig)
     
     # Perform topic modeling
     topics, df = perform_topic_modeling(df)
     
-    # Generate visualizations
-    wordcloud_img = generate_wordcloud(df)
-    fig1, fig2, fig3, fig4, sentiment_distribution, sentiment_over_time, fake_news_distribution = generate_plots(df)
+    # Display key topics
+    st.subheader("Key Topics")
+    for topic in topics:
+        st.write(topic)
     
-    # Convert Plotly figures to HTML
-    plot1 = fig1.to_html(full_html=False)
-    plot2 = fig2.to_html(full_html=False)
-    plot3 = fig3.to_html(full_html=False)
-    plot4 = fig4.to_html(full_html=False)
-    sentiment_plot1 = sentiment_distribution.to_html(full_html=False)
-    sentiment_plot2 = sentiment_over_time.to_html(full_html=False)
-    fake_news_plot = fake_news_distribution.to_html(full_html=False)
-    
-    # Prepare topic time series data
+    # Display time series of key topics
+    st.subheader("Time Series of Key Topics")
     df['created_date'] = pd.to_datetime(df['created'], unit='s')
-    topic_time_series = df.groupby([pd.Grouper(key='created_date', freq='ME'), 'dominant_topic']).size().unstack(fill_value=0)
+    topic_time_series = df.groupby([pd.Grouper(key='created_date', freq='M'), 'dominant_topic']).size().unstack(fill_value=0)
+    fig = px.line(topic_time_series, x=topic_time_series.index, y=topic_time_series.columns,
+                  title='Time Series of Key Topics',
+                  labels={'value': 'Number of Posts', 'created_date': 'Date'})
+    st.plotly_chart(fig)
     
-    # Render the dashboard template
-    return render_template(
-        'index.html',
-        wordcloud_img=wordcloud_img,
-        plot1=plot1,
-        plot2=plot2,
-        plot3=plot3,
-        plot4=plot4,
-        sentiment_plot1=sentiment_plot1,
-        sentiment_plot2=sentiment_plot2,
-        fake_news_plot=fake_news_plot,
-        topic_time_series=topic_time_series.to_json(),
-        topics=topics
-    )
+    # Search functionality
+    st.subheader("Search Posts")
+    query = st.text_input("Enter a keyword or phrase")
+    if query:
+        df['contains_query'] = df['title'].apply(lambda x: query.lower() in x.lower())
+        time_series_data = df[df['contains_query']].groupby(pd.Grouper(key='created_date', freq='M')).size().reset_index(name='count')
+        fig = px.line(time_series_data, x='created_date', y='count',
+                      title=f'Time Series of Posts Containing "{query}"',
+                      labels={'created_date': 'Date', 'count': 'Number of Posts'})
+        st.plotly_chart(fig)
 
-@app.route('/top_words')
-def top_words():
-    """Fetch the top N words and their frequencies."""
-    df = load_dataset('./data/data.jsonl')
-    all_titles = ' '.join(df['title'])
-    filtered_words = preprocess_text(all_titles)
-    word_counts = Counter(filtered_words)
-    
-    # Get the top 10 most frequent words
-    top_words = word_counts.most_common(10)
-    
-    # Prepare data for the pie chart
-    labels = [word for word, count in top_words]
-    values = [count for word, count in top_words]
-    
-    return jsonify({'labels': labels, 'values': values})
-
-@app.route('/search', methods=['POST'])
-def search():
-    """Handle search queries and return time series data."""
-    # Get the search query from the request
-    query = request.json.get('query', '').lower()
-    
-    # Load the dataset
-    df = load_dataset('./data/data.jsonl')
-    
-    # Filter posts containing the search query
-    df['contains_query'] = df['title'].apply(lambda x: query in x.lower())
-    
-    # Group by month and count the number of matching posts
-    df['created_date'] = pd.to_datetime(df['created'], unit='s')
-    time_series_data = df[df['contains_query']].groupby(pd.Grouper(key='created_date', freq='ME')).size().reset_index(name='count')
-    
-    # Prepare data for the time series plot
-    data = {
-        'dates': time_series_data['created_date'].dt.strftime('%Y-%m').tolist(),
-        'counts': time_series_data['count'].tolist()
-    }
-    return jsonify(data)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+# Run the app
+if __name__ == "__main__":
+    main()
