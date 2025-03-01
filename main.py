@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import json
 import plotly.express as px
-import plotly.graph_objects as go
 from wordcloud import WordCloud, STOPWORDS
 from collections import Counter
 import re
@@ -13,19 +12,55 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import networkx as nx
-import matplotlib.pyplot as plt
 from pyvis.network import Network
 
 # Download the VADER lexicon and stopwords
 nltk.download('vader_lexicon')
 nltk.download('stopwords')
 
+# Custom CSS for styling
+st.markdown(
+    """
+    <style>
+    .stButton button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .stButton button:hover {
+        background-color: #45a049;
+    }
+    .stTextInput input {
+        border-radius: 5px;
+        padding: 10px;
+    }
+    .stFileUploader label {
+        font-size: 16px;
+    }
+    .stMarkdown h1 {
+        color: #4CAF50;
+    }
+    .stMarkdown h2 {
+        color: #2E86C1;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Load the dataset
-def load_dataset(file_path):
-    """Load the JSON dataset and convert it into a Pandas DataFrame."""
-    with open(file_path, 'r') as f:
-        data = [json.loads(line) for line in f]
-    df = pd.DataFrame([post['data'] for post in data])
+def load_dataset(file):
+    """Load the dataset from a file (JSONL or CSV)."""
+    if file.name.endswith('.jsonl'):
+        data = [json.loads(line) for line in file]
+        df = pd.DataFrame([post['data'] for post in data])
+    elif file.name.endswith('.csv'):
+        df = pd.read_csv(file)
+    else:
+        st.error("Unsupported file format. Please upload a JSONL or CSV file.")
+        return None
     return df
 
 # Preprocess text
@@ -131,78 +166,86 @@ def plot_network_graph(df, keyword):
 def main():
     st.title("Reddit Data Analysis Dashboard")
 
-    # Load the dataset
-    df = load_dataset('./data/data.jsonl')
+    # Sidebar for user inputs
+    st.sidebar.header("Upload Your Dataset")
+    uploaded_file = st.sidebar.file_uploader("Choose a JSONL or CSV file", type=["jsonl", "csv"])
     
-    # Perform sentiment analysis
-    df = analyze_sentiment(df)
-    
-    # Display sentiment distribution
-    st.subheader("Sentiment Analysis")
-    sentiment_distribution = df['sentiment'].value_counts()
-    st.write(sentiment_distribution)
-    
-    # Display top positive and negative posts
-    st.subheader("Top Positive Posts")
-    st.write(df[df['sentiment'] == 'positive'][['title', 'sentiment_score']].head())
-    
-    st.subheader("Top Negative Posts")
-    st.write(df[df['sentiment'] == 'negative'][['title', 'sentiment_score']].head())
-    
-    # Generate word cloud
-    st.subheader("Word Cloud of Post Titles")
-    wordcloud_img = generate_wordcloud(df)
-    st.image(wordcloud_img, use_container_width=True)
-    
-    # Display top 10 most frequent words as a pie chart
-    st.subheader("Top 10 Most Frequent Words")
-    all_titles = ' '.join(df['title'])
-    filtered_words = preprocess_text(all_titles)
-    word_counts = Counter(filtered_words)
-    top_words = word_counts.most_common(10)
-    
-    # Prepare data for the pie chart
-    words, counts = zip(*top_words)
-    fig = px.pie(names=words, values=counts, title="Top 10 Most Frequent Words")
-    st.plotly_chart(fig)
-    
-    # Pie chart of communities/accounts
-    st.subheader("Top Communities/Accounts")
-    plot_community_pie_chart(df)
-    
-    # Network visualization
-    st.subheader("Network Visualization")
-    keyword = st.text_input("Enter a keyword, hashtag, or URL for network visualization")
-    if keyword:
-        plot_network_graph(df, keyword)
-    
-    # Perform topic modeling
-    topics, df = perform_topic_modeling(df)
-    
-    # Display key topics
-    st.subheader("Key Topics")
-    for topic in topics:
-        st.write(topic)
-    
-    # Display time series of key topics
-    st.subheader("Time Series of Key Topics")
-    df['created_date'] = pd.to_datetime(df['created'], unit='s')
-    topic_time_series = df.groupby([pd.Grouper(key='created_date', freq='M'), 'dominant_topic']).size().unstack(fill_value=0)
-    fig = px.line(topic_time_series, x=topic_time_series.index, y=topic_time_series.columns,
-                  title='Time Series of Key Topics',
-                  labels={'value': 'Number of Posts', 'created_date': 'Date'})
-    st.plotly_chart(fig)
-    
-    # Search functionality
-    st.subheader("Search Posts")
-    query = st.text_input("Enter a keyword or phrase")
-    if query:
-        df['contains_query'] = df['title'].apply(lambda x: query.lower() in x.lower())
-        time_series_data = df[df['contains_query']].groupby(pd.Grouper(key='created_date', freq='M')).size().reset_index(name='count')
-        fig = px.line(time_series_data, x='created_date', y='count',
-                      title=f'Time Series of Posts Containing "{query}"',
-                      labels={'created_date': 'Date', 'count': 'Number of Posts'})
-        st.plotly_chart(fig)
+    if uploaded_file is not None:
+        # Load the dataset
+        df = load_dataset(uploaded_file)
+        
+        if df is not None:
+            # Perform sentiment analysis
+            df = analyze_sentiment(df)
+            
+            # Display sentiment distribution
+            st.subheader("Sentiment Analysis")
+            sentiment_distribution = df['sentiment'].value_counts()
+            st.write(sentiment_distribution)
+            
+            # Display top positive and negative posts
+            st.subheader("Top Positive Posts")
+            st.write(df[df['sentiment'] == 'positive'][['title', 'sentiment_score']].head())
+            
+            st.subheader("Top Negative Posts")
+            st.write(df[df['sentiment'] == 'negative'][['title', 'sentiment_score']].head())
+            
+            # Generate word cloud
+            st.subheader("Word Cloud of Post Titles")
+            wordcloud_img = generate_wordcloud(df)
+            st.image(wordcloud_img, use_container_width=True)
+            
+            # Display top 10 most frequent words as a pie chart
+            st.subheader("Top 10 Most Frequent Words")
+            all_titles = ' '.join(df['title'])
+            filtered_words = preprocess_text(all_titles)
+            word_counts = Counter(filtered_words)
+            top_words = word_counts.most_common(10)
+            
+            # Prepare data for the pie chart
+            words, counts = zip(*top_words)
+            fig = px.pie(names=words, values=counts, title="Top 10 Most Frequent Words")
+            st.plotly_chart(fig)
+            
+            # Pie chart of communities/accounts
+            st.subheader("Top Communities/Accounts")
+            plot_community_pie_chart(df)
+            
+            # Network visualization
+            st.subheader("Network Visualization")
+            keyword = st.text_input("Enter a keyword, hashtag, or URL for network visualization")
+            if keyword:
+                plot_network_graph(df, keyword)
+            
+            # Perform topic modeling
+            topics, df = perform_topic_modeling(df)
+            
+            # Display key topics
+            st.subheader("Key Topics")
+            for topic in topics:
+                st.write(topic)
+            
+            # Display time series of key topics
+            st.subheader("Time Series of Key Topics")
+            df['created_date'] = pd.to_datetime(df['created'], unit='s')
+            topic_time_series = df.groupby([pd.Grouper(key='created_date', freq='M'), 'dominant_topic']).size().unstack(fill_value=0)
+            fig = px.line(topic_time_series, x=topic_time_series.index, y=topic_time_series.columns,
+                          title='Time Series of Key Topics',
+                          labels={'value': 'Number of Posts', 'created_date': 'Date'})
+            st.plotly_chart(fig)
+            
+            # Search functionality
+            st.subheader("Search Posts")
+            query = st.text_input("Enter a keyword or phrase")
+            if query:
+                df['contains_query'] = df['title'].apply(lambda x: query.lower() in x.lower())
+                time_series_data = df[df['contains_query']].groupby(pd.Grouper(key='created_date', freq='M')).size().reset_index(name='count')
+                fig = px.line(time_series_data, x='created_date', y='count',
+                              title=f'Time Series of Posts Containing "{query}"',
+                              labels={'created_date': 'Date', 'count': 'Number of Posts'})
+                st.plotly_chart(fig)
+    else:
+        st.info("Please upload a dataset to get started.")
 
 # Run the app
 if __name__ == "__main__":
