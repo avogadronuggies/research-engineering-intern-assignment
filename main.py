@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import pandas as pd
 import json
 import plotly.express as px
@@ -11,6 +11,9 @@ import base64
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import NMF
+import numpy as np
 
 # Download the VADER lexicon and stopwords
 nltk.download('vader_lexicon')
@@ -68,33 +71,69 @@ def analyze_sentiment(df):
     df['sentiment'] = df['title'].apply(lambda x: analyzer.polarity_scores(x)['compound'])
     return df
 
+def perform_topic_modeling(df, num_topics=5):
+    """Perform topic modeling using NMF."""
+    # Preprocess titles
+    df['tokens'] = df['title'].apply(lambda x: ' '.join(preprocess_text(x)))
+    
+    # Create a TF-IDF vectorizer
+    vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
+    tfidf = vectorizer.fit_transform(df['tokens'])
+    
+    # Perform NMF
+    nmf = NMF(n_components=num_topics, random_state=42)
+    nmf.fit(tfidf)
+    
+    # Get the top words for each topic
+    feature_names = vectorizer.get_feature_names_out()
+    topics = []
+    for topic_idx, topic in enumerate(nmf.components_):
+        top_words = [feature_names[i] for i in topic.argsort()[:-10 - 1:-1]]
+        topics.append(f"Topic {topic_idx + 1}: " + ", ".join(top_words))
+    
+    # Assign dominant topic to each post
+    df['dominant_topic'] = nmf.transform(tfidf).argmax(axis=1)
+    
+    return topics, df
+
 def generate_plots(df):
     """Generate Plotly visualizations."""
     # Distribution of upvotes
-    fig1 = px.histogram(df, x='ups', nbins=30, title='Distribution of Upvotes')
+    fig1 = px.histogram(df, x='ups', nbins=30, title='Distribution of Upvotes',
+                        labels={'ups': 'Upvotes', 'count': 'Frequency'},
+                        color_discrete_sequence=['#1f77b4'])
     
     # Upvotes vs. Comments
-    fig2 = px.scatter(df, x='ups', y='num_comments', title='Upvotes vs. Number of Comments')
+    fig2 = px.scatter(df, x='ups', y='num_comments', title='Upvotes vs. Number of Comments',
+                      labels={'ups': 'Upvotes', 'num_comments': 'Number of Comments'},
+                      color_discrete_sequence=['#ff7f0e'])
     
     # Top 10 most upvoted posts
     top_10_upvoted = df.sort_values('ups', ascending=False).head(10)
-    fig3 = px.bar(top_10_upvoted, x='ups', y='title', title='Top 10 Most Upvoted Posts')
+    fig3 = px.bar(top_10_upvoted, x='ups', y='title', title='Top 10 Most Upvoted Posts',
+                  labels={'ups': 'Upvotes', 'title': 'Post Title'},
+                  color_discrete_sequence=['#2ca02c'])
     
     # Number of posts over time
     df['created_date'] = pd.to_datetime(df['created'], unit='s')
-    posts_over_time = df.groupby(pd.Grouper(key='created_date', freq='M')).size().reset_index(name='count')
-    fig4 = px.line(posts_over_time, x='created_date', y='count', title='Number of Posts Over Time')
+    posts_over_time = df.groupby(pd.Grouper(key='created_date', freq='ME')).size().reset_index(name='count')
+    fig4 = px.line(posts_over_time, x='created_date', y='count', title='Number of Posts Over Time',
+                   labels={'created_date': 'Date', 'count': 'Number of Posts'},
+                   color_discrete_sequence=['#d62728'])
     
     # Sentiment analysis
     sentiment_distribution = px.histogram(df, x='sentiment', nbins=30, title='Sentiment Distribution of Post Titles',
-                                         labels={'sentiment': 'Sentiment Score', 'count': 'Frequency'})
-    sentiment_over_time = px.line(df.groupby(pd.Grouper(key='created_date', freq='M'))['sentiment'].mean().reset_index(),
+                                         labels={'sentiment': 'Sentiment Score', 'count': 'Frequency'},
+                                         color_discrete_sequence=['#9467bd'])
+    sentiment_over_time = px.line(df.groupby(pd.Grouper(key='created_date', freq='ME'))['sentiment'].mean().reset_index(),
                                  x='created_date', y='sentiment', title='Average Sentiment Over Time',
-                                 labels={'created_date': 'Date', 'sentiment': 'Average Sentiment Score'})
+                                 labels={'created_date': 'Date', 'sentiment': 'Average Sentiment Score'},
+                                 color_discrete_sequence=['#8c564b'])
     
     # Fake news analysis
     fake_news_distribution = px.pie(df, names='fake_news', title='Fake News Distribution',
-                                    labels={'fake_news': 'Fake News'})
+                                    labels={'fake_news': 'Fake News'},
+                                    color_discrete_sequence=['#e377c2', '#7f7f7f'])
     
     return fig1, fig2, fig3, fig4, sentiment_distribution, sentiment_over_time, fake_news_distribution
 
@@ -109,6 +148,9 @@ def dashboard():
     # Detect fake news
     df = detect_fake_news(df)
     
+    # Perform topic modeling
+    topics, df = perform_topic_modeling(df)
+    
     # Generate visualizations
     wordcloud_img = generate_wordcloud(df)
     fig1, fig2, fig3, fig4, sentiment_distribution, sentiment_over_time, fake_news_distribution = generate_plots(df)
@@ -122,6 +164,10 @@ def dashboard():
     sentiment_plot2 = sentiment_over_time.to_html(full_html=False)
     fake_news_plot = fake_news_distribution.to_html(full_html=False)
     
+    # Prepare topic time series data
+    df['created_date'] = pd.to_datetime(df['created'], unit='s')
+    topic_time_series = df.groupby([pd.Grouper(key='created_date', freq='ME'), 'dominant_topic']).size().unstack(fill_value=0)
+    
     # Render the dashboard template
     return render_template(
         'index.html',
@@ -132,7 +178,9 @@ def dashboard():
         plot4=plot4,
         sentiment_plot1=sentiment_plot1,
         sentiment_plot2=sentiment_plot2,
-        fake_news_plot=fake_news_plot
+        fake_news_plot=fake_news_plot,
+        topic_time_series=topic_time_series.to_json(),
+        topics=topics
     )
 
 @app.route('/top_words')
@@ -151,6 +199,29 @@ def top_words():
     values = [count for word, count in top_words]
     
     return jsonify({'labels': labels, 'values': values})
+
+@app.route('/search', methods=['POST'])
+def search():
+    """Handle search queries and return time series data."""
+    # Get the search query from the request
+    query = request.json.get('query', '').lower()
+    
+    # Load the dataset
+    df = load_dataset('./data/data.jsonl')
+    
+    # Filter posts containing the search query
+    df['contains_query'] = df['title'].apply(lambda x: query in x.lower())
+    
+    # Group by month and count the number of matching posts
+    df['created_date'] = pd.to_datetime(df['created'], unit='s')
+    time_series_data = df[df['contains_query']].groupby(pd.Grouper(key='created_date', freq='ME')).size().reset_index(name='count')
+    
+    # Prepare data for the time series plot
+    data = {
+        'dates': time_series_data['created_date'].dt.strftime('%Y-%m').tolist(),
+        'counts': time_series_data['count'].tolist()
+    }
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(debug=True)

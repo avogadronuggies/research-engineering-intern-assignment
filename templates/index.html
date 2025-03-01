@@ -26,10 +26,42 @@
         width: 100%;
         height: 400px;
       }
+      #topic-time-series {
+        margin-top: 40px;
+      }
     </style>
   </head>
   <body>
     <h1>Reddit Data Analysis Dashboard</h1>
+
+    <!-- Search Bar -->
+    <div>
+      <h2>Search Posts</h2>
+      <input type="text" id="search-query" placeholder="Enter a keyword or phrase" />
+      <button onclick="handleSearch()">Search</button>
+    </div>
+
+    <!-- Time Series of Search Results -->
+    <div id="search-time-series">
+      <h2>Time Series of Posts Matching Search Query</h2>
+      <div id="time-series-plot"></div>
+    </div>
+
+    <!-- Key Topics -->
+    <div id="key-topics">
+      <h2>Key Topics</h2>
+      <ul>
+        {% for topic in topics %}
+        <li>{{ topic }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Time Series of Key Topics -->
+    <div id="topic-time-series">
+      <h2>Time Series of Key Topics</h2>
+      <div id="topic-time-series-plot"></div>
+    </div>
 
     <!-- Word Cloud and Pie Chart -->
     <div class="visualization-container">
@@ -111,6 +143,61 @@
               updatePieChart(data.labels, data.values);
             });
         });
+
+      // Handle search queries
+      function handleSearch() {
+        const query = document.getElementById("search-query").value;
+        if (query) {
+          fetch("/search", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ query: query }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Update the time series plot
+              Plotly.newPlot(
+                "time-series-plot",
+                [
+                  {
+                    x: data.dates,
+                    y: data.counts,
+                    type: "line",
+                  },
+                ],
+                {
+                  title: `Time Series of Posts Containing "${query}"`,
+                  xaxis: { title: "Date" },
+                  yaxis: { title: "Number of Posts" },
+                }
+              );
+            });
+        }
+      }
+
+      // Plot the time series of key topics
+      const topicTimeSeries = JSON.parse('{{ topic_time_series | tojson | safe }}');
+      const dates = Object.keys(topicTimeSeries);
+      const topics = Object.keys(topicTimeSeries[dates[0]]);
+
+      const data = topics.map(topic => ({
+        x: dates,
+        y: dates.map(date => topicTimeSeries[date][topic]),
+        name: `Topic ${topic}`,
+        type: 'line'
+      }));
+
+      Plotly.newPlot(
+        "topic-time-series-plot",
+        data,
+        {
+          title: "Time Series of Key Topics",
+          xaxis: { title: "Date" },
+          yaxis: { title: "Number of Posts" },
+        }
+      );
     </script>
   </body>
 </html>
