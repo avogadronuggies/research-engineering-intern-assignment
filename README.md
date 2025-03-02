@@ -211,7 +211,7 @@ The application follows a clear data flow pattern:
 
 ### **1. Sentiment Analysis**
 
-![image](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/sentiment_analysis.png)
+![image](https://github.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/sentiment_analysis.png)
 
 ### **2. Topic Modeling**
 
