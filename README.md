@@ -119,19 +119,19 @@ C:.
 
 ## **Screenshots**
 ### **1. Sentiment Analysis**
-![Sentiment Analysis](./assets/sentiment_analysis.png)
+![Sentiment Analysis]()
 
 ### **2. Topic Modeling**
-![Topic Modeling](./assets/topic_modeling.png)
+![Topic Modeling](/assets/topic_modeling.png)
 
 ### **3. Network Visualization**
-![Network Visualization](./assets/network_visualization.png)
+![Network Visualization](/assets/network_visualization.png)
 
 ---
 
 ## **Video Demo**
 Watch the video demo of the dashboard in action:
-- [Google Drive Link](https://drive.google.com/file/d/your-file-id/view)
+- [Google Drive Link](https://drive.google.com/uc?id=1GX7q219C-tMwoMTgF-IY5NQyEIZTH_cp&export=download)
 
 ---
 
