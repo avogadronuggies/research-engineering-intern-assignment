@@ -8,12 +8,14 @@ Welcome to the **Reddit Data Analysis Dashboard**! This project is a Streamlit-b
 1. [Project Overview](#project-overview)
 2. [Features](#features)
 3. [System Design](#system-design)
-4. [How to Use](#how-to-use)
-5. [Screenshots](#screenshots)
-6. [Video Demo](#video-demo)
-7. [Deployment](#deployment)
-8. [Contributing](#contributing)
-9. [License](#license)
+4. [Implementation Details](#implementation-details)
+5. [Data Flow](#data-flow)
+6. [How to Use](#how-to-use)
+7. [Screenshots](#screenshots)
+8. [Video Demo](#video-demo)
+9. [Deployment](#deployment)
+10. [Contributing](#contributing)
+11. [License](#license)
 
 ---
 
@@ -30,15 +32,29 @@ This dashboard is designed to help users analyze Reddit data by providing:
 - **Sentiment Analysis**:
   - Analyze sentiment distribution across posts.
   - View top positive and negative posts.
+  - Track sentiment trends over time.
 - **Topic Modeling**:
-  - Extract key topics from post titles.
+  - Extract key topics from post titles using NMF.
   - Visualize topic trends over time.
+  - Identify emerging discussion themes.
 - **Network Visualization**:
   - Explore connections between authors and subreddits.
+  - Identify key influencers and community clusters.
 - **Interactive Filters**:
-  - Filter data by date, subreddit, or sentiment.
-- **Custom Insights**:
-  - Generate insights using AI/ML techniques.
+  - Filter data by date, subreddit, sentiment, or upvote count.
+  - Dynamically update visualizations based on filters.
+- **Emoji Analysis**:
+  - Track emoji usage across posts and communities.
+  - Identify emotional trends through emoji usage.
+- **User Activity Analysis**:
+  - Identify the most active users and their engagement patterns.
+  - Analyze the relationship between post frequency and popularity.
+- **Text Summarization**:
+  - Generate concise summaries of lengthy posts.
+  - Focus on key information extraction.
+- **Export Functionality**:
+  - Export analysis results as CSV files.
+  - Export raw or filtered datasets for further analysis.
 
 ---
 
@@ -72,29 +88,80 @@ C:.
 │   ├───topic_modeling.py  # Identifying key topics using NMF
 │   ├───user_activity_analysis.py  # Analyzing user engagement
 │   ├───visualization.py  # Functions for data visualization
-
 ```
 
-### **Thought Process**
-1. **Data Loading**:
-   - The app supports JSONL and CSV files for flexibility.
-   - Data is loaded into a Pandas DataFrame for easy manipulation.
+## **Implementation Details**
 
-2. **Sentiment Analysis**:
-   - VADER is used for sentiment analysis due to its effectiveness with social media text.
-   - Posts are categorized as positive, negative, or neutral based on a compound score.
+### **Key Components and Technologies**
 
-3. **Topic Modeling**:
-   - Non-Negative Matrix Factorization (NMF) is used to identify key topics.
-   - TF-IDF vectorization is applied to preprocess text data.
+1. **Core Framework**:
+   - **Streamlit**: Powers the interactive web interface and dashboard components
+   - **Pandas**: Handles data manipulation and analysis
 
-4. **Visualizations**:
-   - Plotly is used for interactive charts (e.g., pie charts, scatterplots).
-   - WordCloud generates word clouds for post titles.
-   - PyVis creates interactive network graphs.
+2. **Analysis Libraries**:
+   - **VADER (Valence Aware Dictionary for Sentiment Reasoning)**: Used for sentiment analysis, specialized for social media text
+   - **NLTK (Natural Language Toolkit)**: Provides text preprocessing capabilities, tokenization, and stopword removal
+   - **Scikit-learn**: Implements topic modeling through Non-Negative Matrix Factorization (NMF) and TF-IDF vectorization
 
-5. **Deployment**:
-   - The app is deployed using Streamlit Sharing for easy access.
+3. **Visualization Technologies**:
+   - **Plotly**: Creates interactive charts (pie charts, scatterplots, bar charts)
+   - **WordCloud**: Generates visual representations of word frequency
+   - **PyVis**: Produces interactive network visualizations
+   - **NetworkX**: Constructs and manipulates network graphs
+
+4. **Data Handling**:
+   - Supports both JSONL and CSV data formats
+   - Implements comprehensive filtering mechanisms (date, subreddit, sentiment, upvotes)
+   - Provides data export capabilities
+
+5. **Key Modules**:
+   - **Sentiment Analysis**: Implements VADER to analyze emotional tone in posts
+   - **Topic Modeling**: Uses NMF with TF-IDF vectorization to identify key discussion topics
+   - **Network Analysis**: Visualizes connections between users and communities
+   - **Text Summarization**: Employs extractive summarization techniques to condense lengthy posts
+   - **User Activity Analysis**: Tracks engagement patterns and post frequency
+   - **Emoji Analysis**: Identifies emotional trends through emoji usage
+
+---
+
+## **Data Flow**
+
+The application follows a clear data flow pattern:
+
+1. **Data Ingestion**:
+   - User uploads JSONL or CSV data through the Streamlit interface
+   - Data is loaded using `data_loader.py`, which detects file format and converts to pandas DataFrame
+
+2. **Data Preprocessing**:
+   - Raw text is cleaned using functions in `text_preprocessing.py`
+   - Stopwords are removed, and text is tokenized
+   - Date fields are converted to proper datetime format
+
+3. **Analysis Pipeline**:
+   - **Sentiment Analysis**: 
+     - Text is processed through VADER sentiment analyzer in `sentiment_analysis.py`
+     - Posts are categorized as positive, negative, or neutral
+     - Sentiment trends are calculated over time
+   
+   - **Topic Modeling**:
+     - Text is vectorized using TF-IDF
+     - NMF is applied to identify key topics
+     - Posts are assigned to dominant topics
+   
+   - **Network Analysis**:
+     - Author-subreddit relationships are mapped
+     - Network graphs are created using NetworkX
+     - Visualizations rendered using PyVis
+
+4. **Filtering**:
+   - User-selected filters in `content_filters.py` are applied to the dataset
+   - Date ranges, subreddits, sentiment categories, and upvote thresholds can be applied
+   - All visualizations update dynamically based on filtered data
+
+5. **Visualization**:
+   - Processed data is visualized through multiple chart types
+   - Interactive elements allow user exploration
+   - Results can be exported for further analysis
 
 ---
 
@@ -111,9 +178,12 @@ C:.
 
 3. **Upload a Dataset**:
    - Upload a JSONL or CSV file containing Reddit data.
+   - The application expects columns like 'title', 'selftext', 'author', 'subreddit', 'created', 'ups', and 'num_comments'.
 
 4. **Explore the Dashboard**:
-   - Use the sidebar to filter data and interact with visualizations.
+   - Use the sidebar to filter data by date range, subreddit, upvote count, and sentiment.
+   - Navigate through different analysis tabs to explore various insights.
+   - Export findings as needed for further analysis.
 
 ---
 
@@ -131,7 +201,7 @@ C:.
 
 ## **Video Demo**
 Watch the video demo of the dashboard in action:
-- [Google Drive Link](https://drive.google.com/file/d/your-file-id/view)
+- [Google Drive Link]()
 
 ---
 
@@ -144,11 +214,11 @@ The dashboard is hosted on **Streamlit Sharing**:
 ## **Contribution**
 By @avogadronuggies
 
-
-
 ## **Acknowledgments**
 - **Streamlit** for the amazing framework.
 - **VADER** for sentiment analysis.
 - **Plotly** for interactive visualizations.
+- **NLTK** for natural language processing capabilities.
+- **Scikit-learn** for machine learning functionality.
 
 ---
