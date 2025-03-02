@@ -1,195 +1,154 @@
-# research-engineering-intern-assignment
+# **Reddit Data Analysis Dashboard**
 
-# Reddit Data Analysis Dashboard
-
-Welcome to the **Reddit Data Analysis Dashboard**! This interactive web application allows you to analyze Reddit data, including sentiment analysis, topic modeling, word clouds, and more. The dashboard is built using Streamlit, Plotly, and other Python libraries to provide a user-friendly interface for exploring Reddit datasets.
+Welcome to the **Reddit Data Analysis Dashboard**! This project is a Streamlit-based web application that allows users to analyze Reddit data interactively. It provides insights into sentiment analysis, topic modeling, network visualization, and more.
 
 ---
 
-## Features
+## **Table of Contents**
+1. [Project Overview](#project-overview)
+2. [Features](#features)
+3. [System Design](#system-design)
+4. [How to Use](#how-to-use)
+5. [Screenshots](#screenshots)
+6. [Video Demo](#video-demo)
+7. [Deployment](#deployment)
+8. [Contributing](#contributing)
+9. [License](#license)
 
-1. **Sentiment Analysis**:
-   - Analyze the sentiment of Reddit post titles using VADER (Valence Aware Dictionary and sEntiment Reasoner).
-   - Categorize posts as positive, negative, or neutral.
-   - Display top positive and negative posts.
+---
 
-2. **Word Cloud**:
-   - Generate a word cloud from post titles to visualize the most frequent words.
-   - Exclude stopwords and short words for better insights.
+## **Project Overview**
+This dashboard is designed to help users analyze Reddit data by providing:
+- **Sentiment Analysis**: Categorize posts as positive, negative, or neutral using VADER.
+- **Topic Modeling**: Identify key topics in Reddit posts using Non-Negative Matrix Factorization (NMF).
+- **Network Visualization**: Visualize relationships between authors and subreddits.
+- **Interactive Visualizations**: Explore data through word clouds, pie charts, scatterplots, and more.
+
+---
+
+## **Features**
+- **Sentiment Analysis**:
+  - Analyze sentiment distribution across posts.
+  - View top positive and negative posts.
+- **Topic Modeling**:
+  - Extract key topics from post titles.
+  - Visualize topic trends over time.
+- **Network Visualization**:
+  - Explore connections between authors and subreddits.
+- **Interactive Filters**:
+  - Filter data by date, subreddit, or sentiment.
+- **Custom Insights**:
+  - Generate insights using AI/ML techniques.
+
+---
+
+## **System Design**
+### **Code Structure**
+```
+C:.
+├───app.py                # Main Streamlit app entry point
+├───README.md             # Project documentation
+├───instructions.md       # Additional setup instructions
+├───requirements.txt      # Required dependencies
+├───.gitignore            # Git ignore file
+├───assets/               # Static assets (e.g., CSS files)
+│   └───styles.css        # Styles for the dashboard
+├───data/                 # Sample datasets
+│   ├───data.jsonl        # Raw Reddit data in JSONL format
+│   ├───processed_reddit_posts.csv  # Preprocessed dataset
+├───lib/                  # External libraries
+├───streamlit/            # Streamlit app files
+├───utils/                # Utility functions
+│   ├───__pycache__/      # Python cache files
+│   ├───__init__.py       # Package initializer
+│   ├───content_filters.py  # Functions for filtering content
+│   ├───data_loader.py      # Data loading utilities
+│   ├───emoji_analysis.py   # Emoji-based sentiment analysis
+│   ├───export_functionality.py  # Export results as CSV/PDF
+│   ├───network_analysis.py  # Analyzing user interactions
+│   ├───sentiment_analysis.py  # Sentiment analysis using VADER
+│   ├───text_preprocessing.py  # Text cleaning and preprocessing
+│   ├───text_summarization.py  # Summarization of Reddit posts
+│   ├───topic_modeling.py  # Identifying key topics using NMF
+│   ├───user_activity_analysis.py  # Analyzing user engagement
+│   ├───visualization.py  # Functions for data visualization
+
+```
+
+### **Thought Process**
+1. **Data Loading**:
+   - The app supports JSONL and CSV files for flexibility.
+   - Data is loaded into a Pandas DataFrame for easy manipulation.
+
+2. **Sentiment Analysis**:
+   - VADER is used for sentiment analysis due to its effectiveness with social media text.
+   - Posts are categorized as positive, negative, or neutral based on a compound score.
 
 3. **Topic Modeling**:
-   - Perform Non-Negative Matrix Factorization (NMF) to identify key topics in the dataset.
-   - Display the top words for each topic and assign a dominant topic to each post.
+   - Non-Negative Matrix Factorization (NMF) is used to identify key topics.
+   - TF-IDF vectorization is applied to preprocess text data.
 
-4. **Community Analysis**:
-   - Visualize the distribution of posts across top communities/accounts using a pie chart.
+4. **Visualizations**:
+   - Plotly is used for interactive charts (e.g., pie charts, scatterplots).
+   - WordCloud generates word clouds for post titles.
+   - PyVis creates interactive network graphs.
 
-5. **Network Visualization**:
-   - Create a network graph of accounts sharing a specific keyword, hashtag, or URL.
-
-6. **Scatterplots**:
-   - Visualize relationships between upvotes and other variables (e.g., number of comments, sentiment score).
-
-7. **Time Series Analysis**:
-   - Track the popularity of key topics over time.
-   - Analyze the frequency of posts containing a specific keyword or phrase over time.
-
-8. **Custom Insights**:
-   - Generate custom insights, including sentiment distribution, top communities, and most frequent words.
+5. **Deployment**:
+   - The app is deployed using Streamlit Sharing for easy access.
 
 ---
 
-## How to Use
-
-1. **Upload Your Dataset**:
-   - The dashboard supports JSONL and CSV file formats.
-   - Upload your dataset using the sidebar.
-
-2. **Explore the Dashboard**:
-   - Once the dataset is uploaded, the dashboard will automatically generate visualizations and insights.
-   - Use the interactive features to filter, search, and explore the data.
-
-3. **Save and Share**:
-   - Take screenshots of the visualizations or download the generated insights for further analysis.
-
----
-
-## Screenshots
-
-Here are some example screenshots of the dashboard in action:
-
-### 1. Sentiment Analysis
-![Sentiment Analysis](images/sentiment_analysis.png)
-
-### 2. Word Cloud
-![Word Cloud](images/wordcloud.png)
-
-### 3. Topic Modeling
-![Topic Modeling](images/topic_modeling.png)
-
-### 4. Community Pie Chart
-![Community Pie Chart](images/community_pie_chart.png)
-
-### 5. Network Visualization
-![Network Visualization](images/network_visualization.png)
-
-### 6. Scatterplot: Upvotes vs Number of Comments
-![Scatterplot](images/scatterplot.png)
-
-### 7. Time Series of Key Topics
-![Time Series](images/time_series.png)
-
----
-
-## Installation
-
-To run this dashboard locally, follow these steps:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/reddit-data-analysis-dashboard.git
-   cd reddit-data-analysis-dashboard
-   ```
-
-2. Install the required dependencies:
+## **How to Use**
+1. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Run the Streamlit app:
+2. **Run the App Locally**:
    ```bash
    streamlit run app.py
    ```
 
-4. Open your browser and navigate to `http://localhost:8501`.
+3. **Upload a Dataset**:
+   - Upload a JSONL or CSV file containing Reddit data.
+
+4. **Explore the Dashboard**:
+   - Use the sidebar to filter data and interact with visualizations.
 
 ---
 
-## Code Overview
+## **Screenshots**
+### **1. Sentiment Analysis**
+![Sentiment Analysis](assets/sentiment_analysis.png)
 
-### 1. Loading the Dataset
-```python
-def load_dataset(file):
-    if file.name.endswith('.jsonl'):
-        data = [json.loads(line) for line in file]
-        df = pd.DataFrame([post['data'] for post in data])
-    elif file.name.endswith('.csv'):
-        df = pd.read_csv(file)
-    else:
-        st.error("Unsupported file format. Please upload a JSONL or CSV file.")
-        return None
-    return df
-```
+### **2. Topic Modeling**
+![Topic Modeling](assets/topic_modeling.png)
 
-### 2. Sentiment Analysis
-```python
-def analyze_sentiment(df):
-    analyzer = SentimentIntensityAnalyzer()
-    df['text'] = df[['title', 'selftext']].fillna('').agg(' '.join, axis=1)
-    df['sentiment_score'] = df['text'].apply(lambda x: analyzer.polarity_scores(x)['compound'])
-    df['sentiment'] = df['sentiment_score'].apply(
-        lambda x: "positive" if x > 0.05 else ("negative" if x < -0.05 else "neutral")
-    )
-    return df
-```
-
-### 3. Word Cloud Generation
-```python
-def generate_wordcloud(df):
-    all_titles = ' '.join(df['title'])
-    filtered_words = preprocess_text(all_titles)
-    filtered_text = ' '.join(filtered_words)
-    wordcloud = WordCloud(width=800, height=400, background_color='white', stopwords=STOPWORDS).generate(filtered_text)
-    img = io.BytesIO()
-    wordcloud.to_image().save(img, format='PNG')
-    img.seek(0)
-    return img
-```
-
-### 4. Topic Modeling
-```python
-def perform_topic_modeling(df, num_topics=5):
-    df['tokens'] = df['title'].apply(lambda x: ' '.join(preprocess_text(x)))
-    vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
-    tfidf = vectorizer.fit_transform(df['tokens'])
-    nmf = NMF(n_components=num_topics, random_state=42)
-    nmf.fit(tfidf)
-    feature_names = vectorizer.get_feature_names_out()
-    topics = []
-    for topic_idx, topic in enumerate(nmf.components_):
-        top_words = [feature_names[i] for i in topic.argsort()[:-10 - 1:-1]]
-        topics.append(f"Topic {topic_idx + 1}: " + ", ".join(top_words))
-    df['dominant_topic'] = nmf.transform(tfidf).argmax(axis=1)
-    return topics, df
-```
+### **3. Network Visualization**
+![Network Visualization](assets/network_visualization.png)
 
 ---
 
-## Dependencies
-
-- Python 3.8+
-- Streamlit
-- Pandas
-- Plotly
-- WordCloud
-- NLTK
-- Scikit-learn
-- VADER Sentiment
-- NetworkX
-- PyVis
+## **Video Demo**
+Watch the video demo of the dashboard in action:
+- [Google Drive Link](https://drive.google.com/file/d/your-file-id/view)
 
 ---
 
-## Contributing
-
-@avogadronuggies
+## **Deployment**
+The dashboard is hosted on **Streamlit Sharing**:
+- [Live Dashboard](https://researchdashbored.streamlit.app)
 
 ---
 
-## License
+## **Contribution**
+By @avogadronuggies
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 
-Enjoy exploring your Reddit data with this dashboard! 🚀
+## **Acknowledgments**
+- **Streamlit** for the amazing framework.
+- **VADER** for sentiment analysis.
+- **Plotly** for interactive visualizations.
 
+---
