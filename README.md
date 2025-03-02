@@ -215,11 +215,11 @@ The application follows a clear data flow pattern:
 
 ### **2. Topic Modeling**
 
-![image](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/topic_modeling.png)
+![image](https://github.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/topic_modeling.png)
 
 ### **3. Network Visualization**
 
-![image](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/network_visualization.png)
+![image](https://github.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/network_visualization.png)
 
 ---
 
