@@ -5,6 +5,7 @@ Welcome to the **Reddit Data Analysis Dashboard**! This project is a Streamlit-b
 ---
 
 ## **Table of Contents**
+
 1. [Project Overview](#project-overview)
 2. [Features](#features)
 3. [System Design](#system-design)
@@ -20,7 +21,9 @@ Welcome to the **Reddit Data Analysis Dashboard**! This project is a Streamlit-b
 ---
 
 ## **Project Overview**
+
 This dashboard is designed to help users analyze Reddit data by providing:
+
 - **Sentiment Analysis**: Categorize posts as positive, negative, or neutral using VADER.
 - **Topic Modeling**: Identify key topics in Reddit posts using Non-Negative Matrix Factorization (NMF).
 - **Network Visualization**: Visualize relationships between authors and subreddits.
@@ -29,6 +32,7 @@ This dashboard is designed to help users analyze Reddit data by providing:
 ---
 
 ## **Features**
+
 - **Sentiment Analysis**:
   - Analyze sentiment distribution across posts.
   - View top positive and negative posts.
@@ -59,7 +63,9 @@ This dashboard is designed to help users analyze Reddit data by providing:
 ---
 
 ## **System Design**
+
 ### **Code Structure**
+
 ```
 C:.
 ├───app.py                # Main Streamlit app entry point
@@ -95,21 +101,25 @@ C:.
 ### **Key Components and Technologies**
 
 1. **Core Framework**:
+
    - **Streamlit**: Powers the interactive web interface and dashboard components
    - **Pandas**: Handles data manipulation and analysis
 
 2. **Analysis Libraries**:
+
    - **VADER (Valence Aware Dictionary for Sentiment Reasoning)**: Used for sentiment analysis, specialized for social media text
    - **NLTK (Natural Language Toolkit)**: Provides text preprocessing capabilities, tokenization, and stopword removal
    - **Scikit-learn**: Implements topic modeling through Non-Negative Matrix Factorization (NMF) and TF-IDF vectorization
 
 3. **Visualization Technologies**:
+
    - **Plotly**: Creates interactive charts (pie charts, scatterplots, bar charts)
    - **WordCloud**: Generates visual representations of word frequency
    - **PyVis**: Produces interactive network visualizations
    - **NetworkX**: Constructs and manipulates network graphs
 
 4. **Data Handling**:
+
    - Supports both JSONL and CSV data formats
    - Implements comprehensive filtering mechanisms (date, subreddit, sentiment, upvotes)
    - Provides data export capabilities
@@ -129,31 +139,37 @@ C:.
 The application follows a clear data flow pattern:
 
 1. **Data Ingestion**:
+
    - User uploads JSONL or CSV data through the Streamlit interface
    - Data is loaded using `data_loader.py`, which detects file format and converts to pandas DataFrame
 
 2. **Data Preprocessing**:
+
    - Raw text is cleaned using functions in `text_preprocessing.py`
    - Stopwords are removed, and text is tokenized
    - Date fields are converted to proper datetime format
 
 3. **Analysis Pipeline**:
-   - **Sentiment Analysis**: 
+
+   - **Sentiment Analysis**:
+
      - Text is processed through VADER sentiment analyzer in `sentiment_analysis.py`
      - Posts are categorized as positive, negative, or neutral
      - Sentiment trends are calculated over time
-   
+
    - **Topic Modeling**:
+
      - Text is vectorized using TF-IDF
      - NMF is applied to identify key topics
      - Posts are assigned to dominant topics
-   
+
    - **Network Analysis**:
      - Author-subreddit relationships are mapped
      - Network graphs are created using NetworkX
      - Visualizations rendered using PyVis
 
 4. **Filtering**:
+
    - User-selected filters in `content_filters.py` are applied to the dataset
    - Date ranges, subreddits, sentiment categories, and upvote thresholds can be applied
    - All visualizations update dynamically based on filtered data
@@ -166,17 +182,21 @@ The application follows a clear data flow pattern:
 ---
 
 ## **How to Use**
+
 1. **Install Dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 2. **Run the App Locally**:
+
    ```bash
    streamlit run app.py
    ```
 
 3. **Upload a Dataset**:
+
    - Upload a JSONL or CSV file containing Reddit data.
    - The application expects columns like 'title', 'selftext', 'author', 'subreddit', 'created', 'ups', and 'num_comments'.
 
@@ -188,33 +208,43 @@ The application follows a clear data flow pattern:
 ---
 
 ## **Screenshots**
+
 ### **1. Sentiment Analysis**
-![Sentiment Analysis](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/sentiment_analysis.png)
+
+![image](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/sentiment_analysis.png)
 
 ### **2. Topic Modeling**
-![Topic Modeling](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/topic_modeling.png)
+
+![image](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/topic_modeling.png)
 
 ### **3. Network Visualization**
-![Network Visualization](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/network_visualization.png)
+
+![image](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/network_visualization.png)
 
 ---
 
 ## **Video Demo**
+
 Watch the video demo of the dashboard in action:
+
 - [Google Drive Link](https://drive.google.com/uc?id=1GX7q219C-tMwoMTgF-IY5NQyEIZTH_cp&export=download)
 
 ---
 
 ## **Deployment**
+
 The dashboard is hosted on **Streamlit Sharing**:
+
 - [Live Dashboard](https://researchdashbored.streamlit.app)
 
 ---
 
 ## **Contribution**
+
 By @avogadronuggies
 
 ## **Acknowledgments**
+
 - **Streamlit** for the amazing framework.
 - **VADER** for sentiment analysis.
 - **Plotly** for interactive visualizations.
