@@ -189,13 +189,13 @@ The application follows a clear data flow pattern:
 
 ## **Screenshots**
 ### **1. Sentiment Analysis**
-![Sentiment Analysis](/assests/sentimet_analysis.png)
+![Sentiment Analysis](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/sentiment_analysis.png)
 
 ### **2. Topic Modeling**
-![Topic Modeling](/assets/topic_modeling.png)
+![Topic Modeling](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/topic_modeling.png)
 
 ### **3. Network Visualization**
-![Network Visualization](/assets/network_visualization.png)
+![Network Visualization](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/network_visualization.png)
 
 ---
 
