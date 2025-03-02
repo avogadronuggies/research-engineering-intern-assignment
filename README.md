@@ -189,19 +189,23 @@ The application follows a clear data flow pattern:
 
 ## **Screenshots**
 ### **1. Sentiment Analysis**
-![Sentiment Analysis](assets/sentiment_analysis.png)
+![Sentiment Analysis]()
 
 ### **2. Topic Modeling**
-![Topic Modeling](assets/topic_modeling.png)
+![Topic Modeling](/assets/topic_modeling.png)
 
 ### **3. Network Visualization**
-![Network Visualization](assets/network_visualization.png)
+![Network Visualization](/assets/network_visualization.png)
 
 ---
 
 ## **Video Demo**
 Watch the video demo of the dashboard in action:
+<<<<<<< HEAD
 - [Google Drive Link]()
+=======
+- [Google Drive Link](https://drive.google.com/uc?id=1GX7q219C-tMwoMTgF-IY5NQyEIZTH_cp&export=download)
+>>>>>>> 29f8a373529098baea04918247645fd1a443dd9b
 
 ---
 
