@@ -228,7 +228,7 @@ The application follows a clear data flow pattern:
 
 Watch the video demo of the dashboard in action:
 
-- [Google Drive Link](https://drive.google.com/drive/folders/17I2s6DRnZxuRsMqKUKmltuinbKFwg83y)
+- [Google Drive Link](https://drive.google.com/file/d/1GX7q219C-tMwoMTgF-IY5NQyEIZTH_cp/view)
 
 ---
 
