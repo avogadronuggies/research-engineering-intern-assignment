@@ -67,33 +67,34 @@ This dashboard is designed to help users analyze Reddit data by providing:
 ### **Code Structure**
 
 ```
-C:.
-├───app.py                # Main Streamlit app entry point
-├───README.md             # Project documentation
-├───instructions.md       # Additional setup instructions
-├───requirements.txt      # Required dependencies
-├───.gitignore            # Git ignore file
-├───assets/               # Static assets (e.g., CSS files)
-│   └───styles.css        # Styles for the dashboard
-├───data/                 # Sample datasets
-│   ├───data.jsonl        # Raw Reddit data in JSONL format
-│   ├───processed_reddit_posts.csv  # Preprocessed dataset
-├───lib/                  # External libraries
-├───streamlit/            # Streamlit app files
-├───utils/                # Utility functions
-│   ├───__pycache__/      # Python cache files
-│   ├───__init__.py       # Package initializer
-│   ├───content_filters.py  # Functions for filtering content
-│   ├───data_loader.py      # Data loading utilities
-│   ├───emoji_analysis.py   # Emoji-based sentiment analysis
-│   ├───export_functionality.py  # Export results as CSV/PDF
-│   ├───network_analysis.py  # Analyzing user interactions
-│   ├───sentiment_analysis.py  # Sentiment analysis using VADER
-│   ├───text_preprocessing.py  # Text cleaning and preprocessing
-│   ├───text_summarization.py  # Summarization of Reddit posts
-│   ├───topic_modeling.py  # Identifying key topics using NMF
-│   ├───user_activity_analysis.py  # Analyzing user engagement
-│   ├───visualization.py  # Functions for data visualization
+📂C:.
+├───📜 app.py                # Main Streamlit app entry point
+├───📖 README.md             # Project documentation
+├───📝 instructions.md       # Additional setup instructions
+├───📋 requirements.txt      # Required dependencies
+├───🚫 .gitignore            # Git ignore file
+├───📂 assets/               # Static assets (e.g., CSS files)
+│   └───🎨 styles.css        # Styles for the dashboard
+├───📊 data/                 # Sample datasets
+│   ├───📜 data.jsonl        # Raw Reddit data in JSONL format
+│   ├───📑 processed_reddit_posts.csv  # Preprocessed dataset
+├───📦 lib/                  # External libraries
+├───🌐 streamlit/            # Streamlit app files
+├───🔧 utils/                # Utility functions
+│   ├───🗂 __pycache__/      # Python cache files
+│   ├───📂 __init__.py       # Package initializer
+│   ├───🛑 content_filters.py  # Functions for filtering content
+│   ├───📂 data_loader.py      # Data loading utilities
+│   ├───😀 emoji_analysis.py   # Emoji-based sentiment analysis
+│   ├───📤 export_functionality.py  # Export results as CSV/PDF
+│   ├───🔗 network_analysis.py  # Analyzing user interactions
+│   ├───😊 sentiment_analysis.py  # Sentiment analysis using VADER
+│   ├───📝 text_preprocessing.py  # Text cleaning and preprocessing
+│   ├───📖 text_summarization.py  # Summarization of Reddit posts
+│   ├───📚 topic_modeling.py  # Identifying key topics using NMF
+│   ├───👥 user_activity_analysis.py  # Analyzing user engagement
+│   ├───📊 visualization.py  # Functions for data visualization
+
 ```
 
 ## **Implementation Details**
@@ -211,15 +212,15 @@ The application follows a clear data flow pattern:
 
 ### **1. Sentiment Analysis**
 
-![image](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/sentiment_analysis.png)
+![image](https://github.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/sentiment_analysis.png)
 
 ### **2. Topic Modeling**
 
-![image](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/topic_modeling.png)
+![image](https://github.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/topic_modeling.png)
 
 ### **3. Network Visualization**
 
-![image](https://raw.githubusercontent.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/network_visualization.png)
+![image](https://github.com/avogadronuggies/research-engineering-intern-assignment/blob/main/assests/network_visualization.png)
 
 ---
 
