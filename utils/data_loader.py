@@ -1,23 +1,34 @@
 import streamlit as st
 import pandas as pd
 import json
+import os
 
-def load_dataset(file):
+def load_dataset():
     """
-    Load the dataset from a file (JSONL or CSV).
-    
-    Parameters:
-    file: Uploaded file object
+    Load the dataset from a local JSONL file in the data folder.
     
     Returns:
     pandas.DataFrame: Loaded dataset
     """
-    if file.name.endswith('.jsonl'):
-        data = [json.loads(line) for line in file]
+    try:
+        # Define the path to the data file
+        file_path = os.path.join('data', 'data.jsonl')
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            st.error(f"Data file not found at {file_path}. Please make sure 'data.jsonl' exists in the 'data' folder.")
+            return None
+            
+        # Load the JSONL file
+        with open(file_path, 'r') as file:
+            data = [json.loads(line) for line in file]
+            
+        # Create DataFrame
         df = pd.DataFrame([post['data'] for post in data])
-    elif file.name.endswith('.csv'):
-        df = pd.read_csv(file)
-    else:
-        st.error("Unsupported file format. Please upload a JSONL or CSV file.")
+        
+        st.success(f"Successfully loaded {len(df)} posts from data.jsonl")
+        return df
+        
+    except Exception as e:
+        st.error(f"Error loading data: {str(e)}")
         return None
-    return df

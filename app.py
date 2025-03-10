@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 from utils.data_loader import load_dataset
 from utils.sentiment_analysis import analyze_sentiment, plot_sentiment_trend
 from utils.text_preprocessing import preprocess_text
@@ -19,9 +18,9 @@ from utils.emoji_analysis import analyze_emojis
 from collections import Counter
 import pandas as pd
 import plotly.express as px
-import json
+import emoji
 
-# Custom CSS for styling (unchanged)
+# Custom CSS for styling
 st.markdown(
     """
     <style>
@@ -53,31 +52,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Function to load data from data.jsonl file
-def load_data_jsonl(file_path="data\data.jsonl"):
-    """
-    Load data from a specific JSONL file.
-    
-    Parameters:
-    file_path (str): Path to the JSONL file
-    
-    Returns:
-    pandas.DataFrame: Loaded dataset or None if file not found
-    """
-    try:
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as file:
-                data = [json.loads(line) for line in file]
-                df = pd.DataFrame([post['data'] for post in data])
-                return df
-        else:
-            st.error(f"File not found: {file_path}")
-            return None
-    except Exception as e:
-        st.error(f"Error loading data: {str(e)}")
-        return None
-
-# Generate custom insights function (unchanged)
+# Generate custom insights function
 def generate_custom_insights(df):
     """Generate custom insights based on the dataset."""
     # Analyze sentiment distribution
@@ -103,11 +78,8 @@ def generate_custom_insights(df):
 def main():
     st.title("Reddit Data Analysis Dashboard")
 
-    # Info message about data source
-    st.info("This application automatically loads data from 'data.jsonl'")
-    
-    # Load the dataset from data.jsonl
-    df = load_data_jsonl()
+    # Load the dataset
+    df = load_dataset()
     
     if df is not None:
         # Perform sentiment analysis
@@ -269,7 +241,17 @@ def main():
         insights = generate_custom_insights(filtered_df)
         st.write(insights)
     else:
-        st.error("Failed to load data from 'data.jsonl'. Please ensure the file exists in the application directory.")
+        # Show error message if data loading failed
+        st.error("Unable to load data. Please check if 'data.jsonl' exists in the 'data' folder.")
+        
+        # Display instructions for setting up the data
+        st.info("""
+        ### How to set up the data:
+        1. Create a 'data' folder in the same directory as this app
+        2. Place your Reddit data file named 'data.jsonl' in the 'data' folder
+        3. The file should be in JSONL format with each line containing a Reddit post
+        4. Refresh this page once the data is in place
+        """)
 
 # Run the app
 if __name__ == "__main__":
